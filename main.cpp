@@ -2,6 +2,8 @@
 #include <fstream>
 #include <ctime>
 #include <vector>
+#include <cstring>
+
 using namespace std;
 void fill_the_ATM ();
 void delete_banknotes (int banknote);
@@ -29,7 +31,7 @@ int main() {
         vector <int> output_banknotes;
 
         for (int i = 0; !file.eof(); i++){ // проверка и вывод средств из банкомата
-            char temp [4];
+            char temp [5];
             file.read(temp,sizeof(temp));
             try {
                 if (removable_banknotes - stoi(temp) > 0 || removable_banknotes - stoi(temp) == 0 ) {
@@ -41,11 +43,12 @@ int main() {
                 cerr << obj.what ();
             }
             if (removable_banknotes == 0) { // вывод средств
-                cout << "Cash withdrawal:";
-                for (int j = 0; j <output_banknotes.size();j++){
-                    cout << output_banknotes [j] << endl;
+
+                for (int j = 0; j < output_banknotes.size();j++){
+                    cout << "Cash withdrawal:" << output_banknotes [j] << endl;
                     //удаление из файла
-                    delete_banknotes (output_banknotes[j]);
+                    int tmp = output_banknotes[j];
+                    delete_banknotes (tmp);
                 }
                 break;}
         }
@@ -53,29 +56,41 @@ int main() {
         file.close ();
     }
 }
+
 void delete_banknotes (int banknote){
     ifstream inFile("bank.bin",ios::binary);
-    ofstream outFile ("bank.bin",ios::binary);
+    while (!inFile.is_open()){cout << "Error";}
+
     vector <int> bank;
     while(!inFile.eof()){
-        char temp [4];
+        char temp [5];
         inFile.read(temp,sizeof(temp));
         try {
-            bank.push_back (stoi(temp));
+             bank.push_back (stoi(temp));
         }catch (const exception &obj) {
             cerr << obj.what ();
         }
     }
+    inFile.close();
+
     for(int i = 0; i < bank.size(); i++){
+        //cout << "bank i = " << bank [i] <<endl;
         if (bank [i] == banknote) {
-            bank [i] = bank.back ();
-            bank.pop_back();
+           if (bank.back () > 0) {bank [i] = bank.back (); bank.pop_back();}
+           else if (bank.back () -1 > 0){bank [i] = bank.back () - 1; bank.pop_back();}
+           else {bank [i] = bank.back () - 2; bank.pop_back();}
+            bank.resize(bank.size ()-1);
             break;}
     }
+
+      ofstream outFile ("bank.bin",ios::binary);
     for(int i = 0; i < bank.size(); i++){
-        outFile.write ((char*)bank[i],sizeof(bank[i]));
+        int temp = bank [i];
+
+        if ( temp < 1000 ) {outFile << temp << " " << endl;}
+        else {outFile << temp <<endl;}
     }
-    inFile.close();
+
     outFile.close();
 }
 
@@ -93,15 +108,15 @@ void fill_the_ATM () {
             fFile.close ();
             cout <<number_of_banknotes;
             int iteration = 1000 - number_of_banknotes;
-        for (int i = 1; i < iteration; i++) {
+        for (int i = 0; i < iteration; i++) {
             int temp = rand() % 5;
             switch (temp) {
                 case 0 :
-                {file << "100" << endl;break;}
+                {file << "100 " << endl;break;}
                 case 1 :
-                {file << "200" << endl;break;}
+                {file << "200 " << endl;break;}
                 case 2 :
-                {file << "500" << endl;break;}
+                {file << "500 " << endl;break;}
                 case 3 :
                 {file << "1000" << endl;break;}
                 case 4 :
