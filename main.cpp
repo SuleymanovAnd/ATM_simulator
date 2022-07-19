@@ -106,7 +106,7 @@ void fill_the_ATM () {
         int x;
         while (fFile >> x) { number_of_banknotes++; }
             fFile.close ();
-            cout <<number_of_banknotes;
+            //cout <<number_of_banknotes;
             int iteration = 1000 - number_of_banknotes;
         for (int i = 0; i < iteration; i++) {
             int temp = rand() % 5;
